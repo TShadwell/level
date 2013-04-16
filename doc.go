@@ -29,10 +29,18 @@
 
 	Atoms are also abstracted using the interfaces KeyMarshaler and ValueMarshaler,
 	if a type impliments the methods MarshalKey() Key and MarshalValue() Value,
-	to generate keys and values respectively, it can be added directly using an atom:
+	to generate keys and values respectively, it can be used more directly with the database:
 
 		testAtom.Object().Delete(
+			//This can be deleted, given it impliments KeyMarshaler
 			things,
+		)
+
+	Types that impliment both KeyMarshaler and ValueMarshaler can be placed directly
+	in the database.
+	
+		testAtom.Object().Place(
+			val,
 		)
 
 	As well as being Written to the database, atoms can be committed, which
@@ -116,24 +124,7 @@ type (
 	ReadOptions struct {
 		readOptions
 	}
-	/*
-		Database represents a levelDB database.
-
-			const location = "database/"
-
-			db := new(Database)
-
-			db.SetCreateIfMissing(
-				true,
-			).SetCacheSize(
-				500 * Megabyte,
-			)
-
-			db.Open(location)
-
-			Alternately:
-
-	*/
+	//A levelDB database
 	Database struct {
 		database
 		Cache Cache
@@ -141,10 +132,14 @@ type (
 		*ReadOptions
 		*WriteOptions
 	}
-
+	//type Atom represents series of deletions and writes that all fail and
+	//do not commit if one fails.
 	Atom struct {
 		writeBatch
 	}
+
+	//type InterfaceAtom abstracts Puts and Deletes
+	//to an atom to allow more direct use of interfacing.
 	InterfaceAtom struct {
 		*Atom
 	}
@@ -245,6 +240,11 @@ func (c *Cache) Size(b BytesSize) *Cache {
 	=== Write Options Functions ===
 */
 
+/*
+	Returns the underlying writeOptions interface
+	of this WriteOptions, creating it if it does not
+	exist.
+*/
 func (w *WriteOptions) Inner() writeOptions {
 	if w == nil {
 		w = new(WriteOptions)
@@ -269,6 +269,11 @@ func (w *WriteOptions) SetSync(b bool) *WriteOptions {
 	=== Read Options Functions ===
 */
 
+/*
+	Returns the underlying readOptions interface
+	of this ReadOptions, creating it if it does not
+	exist.
+*/
 func (r *ReadOptions) Inner() readOptions {
 	if r == nil {
 		r = new(ReadOptions)
@@ -288,6 +293,9 @@ func (r *ReadOptions) SetVerifyChecksums(b bool) *ReadOptions {
 	=== Database Functions ===
 */
 
+/*
+	Function open opens a database for writes at location.
+*/
 func (d *Database) Open(location string) (err error) {
 	if d.database != nil {
 		err = Already_Open
@@ -299,6 +307,10 @@ func (d *Database) Open(location string) (err error) {
 	return
 }
 
+/*
+	Function OpenDB opens a database for writes at location, function chaining
+	syntax.
+*/
 func (d *Database) OpenDB(location string) (*Database, error) {
 	return d, d.Open(location)
 }
@@ -311,6 +323,9 @@ func (d *Database) Close() {
 	d.WriteOptions.Close()
 }
 
+/*
+	Function SetOptions sets the Options of this Database.
+*/
 func (d *Database) SetOptions(o *Options) *Database {
 	if d.Options != nil {
 		panic("Options already set!")
@@ -367,6 +382,9 @@ func (d *Database) Get(k Key) (Value, error) {
 	return db.Get(d.ReadOptions.Inner(), k)
 }
 
+/*
+	Write an Atom or InterfaceAtom to the Database.
+*/
 func (d *Database) Write(an atom) error {
 	db, err := d.Inner()
 	if err != nil {
@@ -375,6 +393,10 @@ func (d *Database) Write(an atom) error {
 	return db.Write(d.WriteOptions.Inner(), an.Inner())
 }
 
+/*
+	Write an Atom or InterfaceAtom to the Database,
+	closing it afterward.
+*/
 func (d *Database) Commit(an atom) error {
 	defer an.Inner().Close()
 	return d.Write(an)
@@ -415,6 +437,9 @@ func (a *Atom) Inner() writeBatch {
 	return a.writeBatch
 }
 
+/*
+	Empty the writes and deletes of this Atom.
+*/
 func (a *Atom) Clear() *Atom {
 	a.Inner().Clear()
 	return a
@@ -425,11 +450,17 @@ func (a *Atom) Close() *Atom {
 	return a
 }
 
+/*
+	Delete a Value from the database.
+*/
 func (a *Atom) Delete(k Key) *Atom {
 	a.Inner().Delete(k)
 	return a
 }
 
+/*
+	Store a Value at Key.
+*/
 func (a *Atom) Put(k Key, v Value) *Atom {
 	a.Inner().Put(k, v)
 	return a
