@@ -1,3 +1,47 @@
+
+/*
+	Package level abstracts a C and Go implimentation of levelDB through use of
+	compile-time tags.
+
+	The tag 'purego' can be used to compile with the go implimentation,
+	github.com/syndtr/goleveldb , otherwise the C- implimentation,
+	github.com/jmhodges/levigo is used.
+
+	A number of different syntaxes can be used with level,
+	it is designed to be friendly with new() syntax and function
+	chaining.
+
+		//Open a Database
+		db, err := new(Database).SetOptions(
+			new(Options).SetCreateIfMissing(
+				true,
+			).SetCacheSize(
+				500 * Megabyte,
+			),
+		).OpenDB(path + "/leveldb")
+	
+	Atoms can be used for atomic writes and deletions
+
+		testAtom := new(Atom).Put(
+			[]byte("beans"),
+			[]byte("can),
+		)
+
+	Atoms are also abstracted using the interfaces KeyMarshaler and ValueMarshaler,
+	if a type impliments the methods MarshalKey() Key and MarshalValue() Value,
+	to generate keys and values respectively, it can be added directly using an atom:
+
+		testAtom.Object().Delete(
+			things,
+		)
+
+	As well as being Written to the database, atoms can be committed, which
+	closes the underlying structure.
+
+		err = db.Commit(testAtom)
+
+
+*/
 package level
 
 //Welcome to wrapper central
