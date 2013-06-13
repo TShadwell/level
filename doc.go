@@ -1,10 +1,10 @@
 
 /*
-	Package level abstracts a C and Go implimentation of levelDB through use of
+	Package level abstracts a C and Go implementation of levelDB through use of
 	compile-time tags.
 
-	The tag 'purego' can be used to compile with the go implimentation,
-	github.com/syndtr/goleveldb , otherwise the C- implimentation,
+	The tag 'purego' can be used to compile with the go implementation,
+	github.com/syndtr/goleveldb , otherwise the C- implementation,
 	github.com/jmhodges/levigo is used.
 
 	A number of different syntaxes can be used with level,
@@ -65,7 +65,7 @@ const (
 	Megabyte
 )
 
-//These represent the interfaces to which implimentations must conform
+//These represent the interfaces to which implementations must conform
 //these will be extended and abstracted by their exported versions
 type (
 	//A Key, for the database
@@ -106,7 +106,7 @@ type (
 	}
 )
 
-//Define the abstract implimentations of the interfaces.
+//Define the abstract implementations of the interfaces.
 type (
 	//Database options
 	Options struct {
@@ -174,7 +174,7 @@ func (k Key) MarshalKey() Key {
 */
 
 /*
-	Gets the underlying implimentation of Options as an interface,
+	Gets the underlying implementation of Options as an interface,
 	creating it if it doesn't already exist.
 */
 func (o *Options) Inner() options {
@@ -217,7 +217,7 @@ func (o *Options) SetCacheSize(size BytesSize) *Options {
 */
 
 /*
-	Function Inner returns the underlying implimentation of the Cache.
+	Function Inner returns the underlying implementation of the Cache.
 
 	Unlike other Inner Functions, this may return nil, since LRUCaches must
 	be created with given size.

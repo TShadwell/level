@@ -3,7 +3,7 @@
 package level
 
 /*
-	An implimentation must include these functions:
+	An implementation must include these functions:
 */
 
 func newLRUCache(capacity int) cache
