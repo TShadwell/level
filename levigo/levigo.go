@@ -6,7 +6,7 @@ import (
 	"github.com/jmhodges/levigo"
 )
 
-func newLRUCache(capacity int) cache {
+func newLRUCache(capacity int) UnderlyingCache {
 	return levigo.NewLRUCache(capacity)
 }
 
@@ -72,6 +72,6 @@ func (o *opts) U() *levigo.Options {
 	return o.Options
 }
 
-func (o opts) SetCache(c cache) {
+func (o opts) SetCache(c UnderlyingCache) {
 	o.U().SetCache(c.(*levigo.Cache))
 }

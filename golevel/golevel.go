@@ -1,6 +1,4 @@
-// +build purego
-
-package level
+package golevel
 
 import (
 	"github.com/syndtr/goleveldb/leveldb"
@@ -8,7 +6,18 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+	"github.com/TShadwell/level"
 )
+var lv *level.Level
+
+func Level() *level.Level{
+	if lv == nil{
+		lv = level.New(new(ulevel))
+	}
+	return lv
+}
+
+type ulevel struct{}
 
 type db struct {
 	*leveldb.DB
@@ -27,15 +36,15 @@ func (d db) Close() {
 	}
 }
 
-func (d db) Put(w writeOptions, k Key, v Value) error {
+func (d db) Put(w level.UnderlyingWriteOptions, k level.Key, v level.Value) error {
 	return d.DB.Put(k, v, w.(wopts).WriteOptions)
 }
 
-func (d db) Delete(w writeOptions, k Key) error {
+func (d db) Delete(w level.UnderlyingWriteOptions, k level.Key) error {
 	return d.DB.Delete(k, w.(wopts).WriteOptions)
 }
 
-func (d db) Get(ro readOptions, k Key) (v Value, e error) {
+func (d db) Get(ro level.UnderlyingReadOptions, k level.Key) (v level.Value, e error) {
 	v, e = d.DB.Get(k, ro.(ropts).ReadOptions)
 	if e == errors.ErrNotFound {
 		//so it works like levigo
@@ -44,7 +53,7 @@ func (d db) Get(ro readOptions, k Key) (v Value, e error) {
 	return
 }
 
-func (d db) Write(w writeOptions, a writeBatch) error {
+func (d db) Write(w level.UnderlyingWriteOptions, a level.UnderlyingWriteBatch) error {
 	return d.DB.Write(a.(wb).Batch, w.(wopts).WriteOptions)
 }
 
@@ -59,11 +68,11 @@ func (w wb) batch() *leveldb.Batch {
 	return w.Batch
 }
 
-func (w wb) Delete(k Key) {
+func (w wb) Delete(k level.Key) {
 	w.batch().Delete(k)
 }
 
-func (w wb) Put(k Key, v Value) {
+func (w wb) Put(k level.Key, v level.Value) {
 	w.batch().Put(k, v)
 }
 
@@ -145,7 +154,7 @@ func (o opts) SetCreateIfMissing(b bool) {
 	}
 }
 
-func (o opts) SetCache(c cache) {
+func (o opts) SetCache(c level.UnderlyingCache) {
 	o.Options.BlockCache = c.(che).Cache
 }
 
@@ -159,7 +168,7 @@ func (c che) Close() {
 	})
 }
 
-func openDatabase(name string, o options) (dtb database, err error) {
+func (l *ulevel) OpenDatabase(name string, o level.UnderlyingOptions) (dtb level.UnderlyingDatabase, err error) {
 	stor, err := storage.OpenFile(name)
 	if err != nil {
 		return
@@ -170,38 +179,38 @@ func openDatabase(name string, o options) (dtb database, err error) {
 	return
 }
 
-func newLRUCache(capacity int) cache {
+func (l *ulevel) NewLRUCache(capacity int) level.UnderlyingCache {
 	return che{
 		Cache: C.NewLRUCache(capacity),
 	}
 }
 
 //BUG: Destroy database not written
-func destroyDatabase(name string, o options) error {
+func (l *ulevel) DestroyDatabase(name string, o level.UnderlyingOptions) error {
 	return nil
 }
 
 //BUG: Repair database not in go-leveldb
-func repairDatabase(name string, o options) error {
+func (l *ulevel)RepairDatabase(name string, o level.UnderlyingOptions) error {
 	return nil
 }
 
-func newOptions() options {
+func (l *ulevel) NewOptions() level.UnderlyingOptions {
 	return opts{
 		new(opt.Options),
 	}
 }
-func newReadOptions() readOptions {
+func(l *ulevel) NewReadOptions() level.UnderlyingReadOptions {
 	return ropts{
 		ReadOptions: new(opt.ReadOptions),
 	}
 }
-func newWriteOptions() writeOptions {
+func(l *ulevel) NewWriteOptions() level.UnderlyingWriteOptions {
 	return wopts{
 		new(opt.WriteOptions),
 	}
 }
-func newWriteBatch() writeBatch {
+func(l *ulevel) NewWriteBatch() level.UnderlyingWriteBatch {
 	return wb{
 		new(leveldb.Batch),
 	}
