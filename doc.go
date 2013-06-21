@@ -1,45 +1,36 @@
 /*
-	Package level abstracts a C and Go implementation of levelDB through use of
-	compile-time tags.
+	Package level abstracts levelDB, providing a midway point through which several implementations
+	of levelDB may be used. In previous versions this relied on build tags, but this restricted
+	how buildtags could be used when this package was imported, and extensibility, this way an
+	importer may specify that heroku builds must use goleveldb for example.
 
-	The tag 'purego' can be used to compile with the go implementation,
-	github.com/syndtr/goleveldb , otherwise the C- implementation,
-	github.com/jmhodges/levigo is used.
+	The subpackage /golevel provides a *level.Level corresponding to github.com/syndtr/goleveldb,
+	and the subpackage /levigo provides one corresponding to github.com/jmhodges/levigo
 
-	A number of different syntaxes can be used with level,
-	it is designed to be friendly with new() syntax and function
-	chaining.
+	It is important to note that there is no system that allows compatibility between the abstracted
+	types of different implimentations, trying to mix them will usually cause assertion runtime panics.
 
-		//Open a Database
-		db, err := new(Database).SetOptions(
-			new(Options).SetCreateIfMissing(
+		var lvl *level.Level
+
+		//Import the package of your choice
+		lvl = levigo.Level()
+
+		db := &level.Database{
+			Cache: lvl.NewCache(500 *level.Megabyte),
+			Options: lvl.NewOptions().SetCreateIfMissing(
 				true,
-			).SetCacheSize(
-				500 * Megabyte,
 			),
-		).OpenDB(path + "/leveldb")
+		}
+
+		if err := lvl.OpenDatabase(db, path+"/leveldb/"); err != nil{
+			t.Fatal("Error whilst loading DB:", err)
+		}
 
 	Atoms can be used for atomic writes and deletions
 
-		testAtom := new(Atom).Put(
+		testAtom := lvl.NewAtom().Put(
 			[]byte("beans"),
-			[]byte("can),
-		)
-
-	Atoms are also abstracted using the interfaces KeyMarshaler and ValueMarshaler,
-	if a type impliments the methods MarshalKey() Key and MarshalValue() Value,
-	to generate keys and values respectively, it can be used more directly with the UnderlyingDatabase:
-
-		testAtom.Object().Delete(
-			//This can be deleted, given it impliments KeyMarshaler
-			things,
-		)
-
-	Types that impliment both KeyMarshaler and ValueMarshaler can be placed directly
-	in the UnderlyingDatabase.
-
-		testAtom.Object().Place(
-			val,
+			[]byte("can"),
 		)
 
 	As well as being Written to the UnderlyingDatabase, atoms can be committed, which
@@ -47,6 +38,7 @@
 
 		err = db.Commit(testAtom)
 
+	The /legacy package has the same interface as previous versions, which used build tags.
 
 */
 package level
