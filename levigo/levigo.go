@@ -1,5 +1,3 @@
-// +build !purego
-
 package level
 
 import (
