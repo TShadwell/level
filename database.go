@@ -1,18 +1,19 @@
 package level
+
 func (l *Level) OpenDatabase(d *Database, location string) (err error) {
-	if d.Options == nil{
+	if d.Options == nil {
 		d.Options = l.NewOptions()
 	}
 
-	if d.ReadOptions == nil{
+	if d.ReadOptions == nil {
 		d.ReadOptions = l.NewReadOptions()
 	}
 
-	if d.WriteOptions == nil{
+	if d.WriteOptions == nil {
 		d.WriteOptions = l.NewWriteOptions()
 	}
 	d.UnderlyingDatabase, err = l.UnderlyingLevel.OpenDatabase(location, d.Options.UnderlyingOptions)
-	if err != nil{
+	if err != nil {
 		return
 	}
 	return
@@ -25,7 +26,6 @@ func (d *Database) Close() {
 	d.ReadOptions.Close()
 	d.WriteOptions.Close()
 }
-
 
 /*
 	Function SetOptions sets the Options of this Database.
@@ -85,5 +85,3 @@ func (d *Database) Commit(an *Atom) error {
 	defer an.UnderlyingWriteBatch.Close()
 	return d.Write(an)
 }
-
-

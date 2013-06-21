@@ -70,7 +70,7 @@ type (
 	//A Key, for the UnderlyingDatabase
 	Key []byte
 	//A Value, for the UnderlyingDatabase
-	Value  []byte
+	Value             []byte
 	UnderlyingOptions interface {
 		SetCreateIfMissing(yes bool)
 		SetCache(UnderlyingCache)
@@ -165,8 +165,6 @@ type (
 		NewWriteOptions() UnderlyingWriteOptions
 		NewWriteBatch() UnderlyingWriteBatch
 	}
-
-
 )
 
 func (v Value) MarshalValue() Value {

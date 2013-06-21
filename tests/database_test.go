@@ -4,11 +4,11 @@ import (
 	"bitbucket.org/kardianos/osext"
 	"bytes"
 	"github.com/TShadwell/go-useful/errors"
-	"testing"
 	"github.com/TShadwell/level"
 	glvl "github.com/TShadwell/level/golevel"
+	lvigo "github.com/TShadwell/level/levigo"
+	"testing"
 )
-
 
 var (
 	keyone   = []byte("Alpha")
@@ -18,23 +18,23 @@ var (
 )
 
 func TestDatabase(t *testing.T) {
-	for _,v := range []*level.Level{glvl.Level()}{
+	for _, v := range []*level.Level{glvl.Level(), lvigo.Level()} {
 		Tdb(t, v)
 	}
 }
 
-func Tdb(t *testing.T, lvl *level.Level){
+func Tdb(t *testing.T, lvl *level.Level) {
 	path, err := osext.ExecutableFolder()
 	if err != nil {
 		panic(err)
 	}
 	db := &level.Database{
-		Cache: lvl.NewCache(500 *level.Megabyte),
+		Cache: lvl.NewCache(500 * level.Megabyte),
 		Options: lvl.NewOptions().SetCreateIfMissing(
 			true,
 		),
 	}
-	err = lvl.OpenDatabase(db, path + "/leveldb/")
+	err = lvl.OpenDatabase(db, path+"/leveldb/")
 	if err != nil {
 		t.Fatal("Error whilst loading DB: ", errors.Extend(err))
 	}

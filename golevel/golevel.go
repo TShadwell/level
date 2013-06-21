@@ -1,17 +1,18 @@
 package golevel
 
 import (
+	"github.com/TShadwell/level"
 	"github.com/syndtr/goleveldb/leveldb"
 	C "github.com/syndtr/goleveldb/leveldb/cache"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
-	"github.com/TShadwell/level"
 )
+
 var lv *level.Level
 
-func Level() *level.Level{
-	if lv == nil{
+func Level() *level.Level {
+	if lv == nil {
 		lv = level.New(new(ulevel))
 	}
 	return lv
@@ -168,7 +169,7 @@ func (c che) Close() {
 	})
 }
 
-func (l *ulevel) OpenDatabase(name string, o level.UnderlyingOptions) (dtb level.UnderlyingDatabase, err error) {
+func (ulevel) OpenDatabase(name string, o level.UnderlyingOptions) (dtb level.UnderlyingDatabase, err error) {
 	stor, err := storage.OpenFile(name)
 	if err != nil {
 		return
@@ -179,38 +180,38 @@ func (l *ulevel) OpenDatabase(name string, o level.UnderlyingOptions) (dtb level
 	return
 }
 
-func (l *ulevel) NewLRUCache(capacity int) level.UnderlyingCache {
+func (ulevel) NewLRUCache(capacity int) level.UnderlyingCache {
 	return che{
 		Cache: C.NewLRUCache(capacity),
 	}
 }
 
 //BUG: Destroy database not written
-func (l *ulevel) DestroyDatabase(name string, o level.UnderlyingOptions) error {
+func (ulevel) DestroyDatabase(name string, o level.UnderlyingOptions) error {
 	return nil
 }
 
 //BUG: Repair database not in go-leveldb
-func (l *ulevel)RepairDatabase(name string, o level.UnderlyingOptions) error {
+func (ulevel) RepairDatabase(name string, o level.UnderlyingOptions) error {
 	return nil
 }
 
-func (l *ulevel) NewOptions() level.UnderlyingOptions {
+func (ulevel) NewOptions() level.UnderlyingOptions {
 	return opts{
 		new(opt.Options),
 	}
 }
-func(l *ulevel) NewReadOptions() level.UnderlyingReadOptions {
+func (ulevel) NewReadOptions() level.UnderlyingReadOptions {
 	return ropts{
 		ReadOptions: new(opt.ReadOptions),
 	}
 }
-func(l *ulevel) NewWriteOptions() level.UnderlyingWriteOptions {
+func (ulevel) NewWriteOptions() level.UnderlyingWriteOptions {
 	return wopts{
 		new(opt.WriteOptions),
 	}
 }
-func(l *ulevel) NewWriteBatch() level.UnderlyingWriteBatch {
+func (ulevel) NewWriteBatch() level.UnderlyingWriteBatch {
 	return wb{
 		new(leveldb.Batch),
 	}

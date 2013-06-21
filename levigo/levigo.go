@@ -3,33 +3,45 @@
 package level
 
 import (
+	"github.com/TShadwell/level"
 	"github.com/jmhodges/levigo"
 )
 
-func newLRUCache(capacity int) UnderlyingCache {
+var lv *level.Level
+
+type ulevel struct{}
+
+func Level() *level.Level {
+	if lv == nil {
+		lv = level.New(new(ulevel))
+	}
+	return lv
+}
+
+func (ulevel) NewLRUCache(capacity int) level.UnderlyingCache {
 	return levigo.NewLRUCache(capacity)
 }
 
-func destroyDatabase(name string, o options) error {
+func (ulevel) DestroyDatabase(name string, o level.UnderlyingOptions) error {
 	return levigo.DestroyDatabase(name, o.(opts).Options)
 }
-func repairDatabase(name string, o options) error {
+func (ulevel) RepairDatabase(name string, o level.UnderlyingOptions) error {
 	return levigo.RepairDatabase(name, o.(opts).Options)
 }
-func openDatabase(name string, o options) (database, error) {
+func (ulevel) OpenDatabase(name string, o level.UnderlyingOptions) (level.UnderlyingDatabase, error) {
 	dtb, e := levigo.Open(name, o.(opts).Options)
 	return db{dtb}, e
 }
-func newOptions() options {
+func (ulevel) NewOptions() level.UnderlyingOptions {
 	return opts{levigo.NewOptions()}
 }
-func newReadOptions() readOptions {
+func (ulevel) NewReadOptions() level.UnderlyingReadOptions {
 	return levigo.NewReadOptions()
 }
-func newWriteOptions() writeOptions {
+func (ulevel) NewWriteOptions() level.UnderlyingWriteOptions {
 	return levigo.NewWriteOptions()
 }
-func newWriteBatch() writeBatch {
+func (ulevel) NewWriteBatch() level.UnderlyingWriteBatch {
 	return wtb{levigo.NewWriteBatch()}
 }
 
@@ -37,18 +49,18 @@ type db struct {
 	*levigo.DB
 }
 
-func (d db) Delete(w writeOptions, k Key) error {
+func (d db) Delete(w level.UnderlyingWriteOptions, k level.Key) error {
 	return d.DB.Delete(w.(*levigo.WriteOptions), k)
 }
-func (d db) Put(w writeOptions, k Key, v Value) error {
+func (d db) Put(w level.UnderlyingWriteOptions, k level.Key, v level.Value) error {
 	return d.DB.Put(w.(*levigo.WriteOptions), k, v)
 }
 
-func (d db) Write(w writeOptions, wb writeBatch) error {
+func (d db) Write(w level.UnderlyingWriteOptions, wb level.UnderlyingWriteBatch) error {
 	return d.DB.Write(w.(*levigo.WriteOptions), wb.(wtb).WriteBatch)
 }
 
-func (d db) Get(r readOptions, k Key) (Value, error) {
+func (d db) Get(r level.UnderlyingReadOptions, k level.Key) (level.Value, error) {
 	return d.DB.Get(r.(*levigo.ReadOptions), k)
 }
 
@@ -56,11 +68,11 @@ type wtb struct {
 	*levigo.WriteBatch
 }
 
-func (w wtb) Delete(k Key) {
+func (w wtb) Delete(k level.Key) {
 	w.WriteBatch.Delete(k)
 }
 
-func (w wtb) Put(k Key, v Value) {
+func (w wtb) Put(k level.Key, v level.Value) {
 	w.WriteBatch.Put(k, v)
 }
 
@@ -72,6 +84,6 @@ func (o *opts) U() *levigo.Options {
 	return o.Options
 }
 
-func (o opts) SetCache(c UnderlyingCache) {
+func (o opts) SetCache(c level.UnderlyingCache) {
 	o.U().SetCache(c.(*levigo.Cache))
 }

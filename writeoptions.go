@@ -1,6 +1,6 @@
 package level
 
-func (l *Level) NewWriteOptions() *WriteOptions{
+func (l *Level) NewWriteOptions() *WriteOptions {
 	return &WriteOptions{
 		l.UnderlyingLevel.NewWriteOptions(),
 	}
@@ -11,7 +11,7 @@ func (l *Level) NewWriteOptions() *WriteOptions{
 	immediately from the buffer cache. This slows down writes
 	but has better crash semantics.
 */
-func (w *WriteOptions) SetSync(sync bool) *WriteOptions{
+func (w *WriteOptions) SetSync(sync bool) *WriteOptions {
 	w.UnderlyingWriteOptions.SetSync(sync)
 	return w
 }

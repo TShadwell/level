@@ -1,5 +1,6 @@
 package level
-func (l *Level) NewAtom() *Atom{
+
+func (l *Level) NewAtom() *Atom {
 	return &Atom{
 		l.NewWriteBatch(),
 	}
