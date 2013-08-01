@@ -9,13 +9,10 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/storage"
 )
 
-var lv *level.Level
+var Level *level.Level
 
-func Level() *level.Level {
-	if lv == nil {
-		lv = level.New(new(ulevel))
-	}
-	return lv
+func init() {
+	Level = level.New(ulevel{})
 }
 
 type ulevel struct{}

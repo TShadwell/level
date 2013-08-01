@@ -5,15 +5,12 @@ import (
 	"github.com/jmhodges/levigo"
 )
 
-var lv *level.Level
+var Level *level.Level
 
 type ulevel struct{}
 
-func Level() *level.Level {
-	if lv == nil {
-		lv = level.New(new(ulevel))
-	}
-	return lv
+func init() {
+	Level = level.New(ulevel{})
 }
 
 func (ulevel) NewLRUCache(capacity int) level.UnderlyingCache {

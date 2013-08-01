@@ -18,7 +18,7 @@ var (
 )
 
 func TestDatabase(t *testing.T) {
-	for _, v := range []*level.Level{glvl.Level(), lvigo.Level()} {
+	for _, v := range []*level.Level{glvl.Level, lvigo.Level} {
 		Tdb(t, v)
 	}
 }
